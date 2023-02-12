@@ -1,0 +1,43 @@
+# ワークフローの名前
+name: deploy
+
+# トリガーの設定
+on:
+  # プッシュされたとき
+  push:
+    # mainブランチとfeature/push_images_to_ecrブランチに対して実行
+    branches:
+      - main
+      - feature/push_images_to_ecr
+
+# env: 環境変数の設定
+env:
+  # AWSのリージョン
+  AWS_REGION: ap-northeast-1
+
+# ジョブの設定
+jobs:
+  # ジョブID
+  deploy:
+    # ジョブ名
+    name: Deploy app to aws Fargate
+    # ジョブの実行環境
+    runs-on: ubuntu-latest
+
+    # ジョブのステップ(実行する処理)
+    steps:
+      - name: Configure aws credentials for prod # ジョブのステップ名(ECRにログインするための設定)
+        # if : github.ref == 'refs/heads/main' # mainブランチのときのみ実行
+        uses: aws-actions/configure-aws-credentials@v1 # 使用するアクション
+        with:
+          aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }} # AWSのアクセスキー
+          aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }} # AWSのシークレットアクセスキー
+          aws-region: ${{ env.AWS_REGION }} # AWSのリージョン
+
+#      - name: Configure aws credentials for dev # ジョブのステップ名(ECRにログインするための設定)
+#        # if : github.ref == 'refs/heads/develop' # developブランチのときのみ実行
+#        uses: aws-actions/configure-aws-credentials@v1 # 使用するアクション
+#        with:
+#          aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }} # AWSのアクセスキー
+#          aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }} # AWSのシークレットアクセスキー
+#          aws-region: ${{ env.AWS_REGION }} # AWSのリージョン
